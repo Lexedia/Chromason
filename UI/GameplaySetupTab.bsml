@@ -1,0 +1,52 @@
+<bg xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  <vertical>
+    <modifier-container child-expand-width="true" horizontal-fit="PreferredSize">
+      <toggle-setting text="Headset" value="headset-enabled" apply-on-change="true"
+                      hover-hint="Undo Chroma in the headset, as chosen in Headset settings" />
+      <toggle-setting text="Desktop" value="desktop-enabled" apply-on-change="true"
+                      hover-hint="Undo Chroma on desktop cameras (Camera2, ReeCamera...), as chosen in Desktop settings" />
+    </modifier-container>
+    <text text="ImBlindedByTheLights is installed and conflicts with Chromason, disable one of them"
+          active="~ibbtl-installed" font-size="3" font-color="#FF7070" align="Center" word-wrapping="true" />
+    <horizontal>
+      <button text="Headset settings" click-event="show-headset-settings" />
+      <button text="Desktop settings" click-event="show-desktop-settings" />
+    </horizontal>
+  </vertical>
+
+  <modal show-event="show-headset-settings" hide-event="hide-headset-settings" move-to-center="true" click-off-closes="true"
+         size-delta-x="80" size-delta-y="58">
+    <vertical horizontal-fit="PreferredSize" vertical-fit="PreferredSize" preferred-width="78" pad-left="3" pad-right="3" pad-top="2" pad-bottom="2" child-expand-width="true">
+      <text text="Headset" align="Center" font-size="5" />
+      <toggle-setting text="No Chroma events" value="chroma-events-headset" apply-on-change="true"
+                      hover-hint="Vanilla light, wall, bomb and note colours" />
+      <toggle-setting text="Static lights" value="static-lights-headset" apply-on-change="true"
+                      hover-hint="No light events: the game's static lights preset, with rings and lasers held still" />
+      <toggle-setting text="No environment changes" value="environment-headset" apply-on-change="true"
+                      hover-hint="Hides objects Chroma added, puts moved or removed ones back and restores the fog" />
+      <toggle-setting text="No note colouring" value="note-colouring-headset" apply-on-change="true"
+                      hover-hint="Colour scheme note colours" />
+      <toggle-setting text="No map colours" value="map-colours-headset" apply-on-change="true"
+                      hover-hint="Your own colour scheme instead of the map's custom colours" />
+      <primary-button text="Close" click-event="hide-headset-settings" />
+    </vertical>
+  </modal>
+
+  <modal show-event="show-desktop-settings" hide-event="hide-desktop-settings" move-to-center="true" click-off-closes="true"
+         size-delta-x="80" size-delta-y="58">
+    <vertical horizontal-fit="PreferredSize" vertical-fit="PreferredSize" preferred-width="78" pad-left="3" pad-right="3" pad-top="2" pad-bottom="2" child-expand-width="true">
+      <text text="Desktop" align="Center" font-size="5" />
+      <toggle-setting text="No Chroma events" value="chroma-events-desktop" apply-on-change="true"
+                      hover-hint="Vanilla light, wall, bomb and note colours" />
+      <toggle-setting text="Static lights" value="static-lights-desktop" apply-on-change="true"
+                      hover-hint="No light events: the game's static lights preset, with rings and lasers held still" />
+      <toggle-setting text="No environment changes" value="environment-desktop" apply-on-change="true"
+                      hover-hint="Hides objects Chroma added, puts moved or removed ones back and restores the fog" />
+      <toggle-setting text="No note colouring" value="note-colouring-desktop" apply-on-change="true"
+                      hover-hint="Colour scheme note colours" />
+      <toggle-setting text="No map colours" value="map-colours-desktop" apply-on-change="true"
+                      hover-hint="Your own colour scheme instead of the map's custom colours" />
+      <primary-button text="Close" click-event="hide-desktop-settings" />
+    </vertical>
+  </modal>
+</bg>

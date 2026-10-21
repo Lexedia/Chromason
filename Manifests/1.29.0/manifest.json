@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "Chromason",
+  "name": "Chromason",
+  "author": "lexedia",
+  "version": "0.0.1",
+  "description": "Walls off Chroma for your pretty eyes, but keep it fancy for other people to see it.",
+  "gameVersion": "1.29.1",
+  "dependsOn": {
+    "BSIPA": "^4.3.6",
+    "SiraUtil": "^3.1.2",
+    "BeatSaberMarkupLanguage": "^1.6.10",
+    "Chroma": "^2.9.0",
+    "Heck": "^1.7.0"
+  },
+  "loadAfter": [
+    "Chroma"
+  ]
+}

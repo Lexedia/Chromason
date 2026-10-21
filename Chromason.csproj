@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Chromason</RootNamespace>
+    <AssemblyName>Chromason</AssemblyName>
+    <Version>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\Manifests\$(ChromasonProfile)\manifest.json')), '"version":\s*"([^"]*)"').Groups[1].Value)</Version>
+    <Authors>lexedia</Authors>
+    <Description>Walls off Chroma for your pretty eyes, but keep it fancy for other people to see it.</Description>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$(Configuration)\$(LegatoTargetVersion)\</OutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <ManagedDir>$(BeatSaberDir)\Beat Saber_Data\Managed</ManagedDir>
+    <LegatoEnableHarmonyEvents>false</LegatoEnableHarmonyEvents>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**;bin\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <Reference Private="false" />
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony" HintPath="$(BeatSaberDir)\Libs\0Harmony.dll" />
+    <Reference Include="BSML" HintPath="$(BeatSaberDir)\Plugins\BSML.dll" />
+    <Reference Include="Chroma" HintPath="$(BeatSaberDir)\Plugins\Chroma.dll" Publicize="true" />
+    <Reference Include="Heck" HintPath="$(BeatSaberDir)\Plugins\Heck.dll" />
+    <Reference Include="SiraUtil" HintPath="$(BeatSaberDir)\Plugins\SiraUtil.dll" />
+    <Reference Include="IPA.Loader" HintPath="$(ManagedDir)\IPA.Loader.dll" />
+    <Reference Include="Main" HintPath="$(ManagedDir)\Main.dll" Publicize="true" />
+    <Reference Include="HMLib" HintPath="$(ManagedDir)\HMLib.dll" />
+    <Reference Include="HMRendering" HintPath="$(ManagedDir)\HMRendering.dll" Publicize="true" />
+    <Reference Include="HMUI" HintPath="$(ManagedDir)\HMUI.dll" />
+    <Reference Include="Tweening" HintPath="$(ManagedDir)\Tweening.dll" />
+    <Reference Include="Zenject" HintPath="$(ManagedDir)\Zenject.dll" />
+    <Reference Include="Zenject-usage" HintPath="$(ManagedDir)\Zenject-usage.dll" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedDir)\UnityEngine.CoreModule.dll" />
+    <Reference Include="UnityEngine.ParticleSystemModule" HintPath="$(ManagedDir)\UnityEngine.ParticleSystemModule.dll" />
+    <Reference Include="UnityEngine.UI" HintPath="$(ManagedDir)\UnityEngine.UI.dll" />
+    <Reference Include="Unity.TextMeshPro" HintPath="$(ManagedDir)\Unity.TextMeshPro.dll" />
+    <Reference Include="UnityEngine.ImageConversionModule" HintPath="$(ManagedDir)\UnityEngine.ImageConversionModule.dll" />
+    <Reference Include="BeatmapCore" HintPath="$(ManagedDir)\BeatmapCore.dll" Condition="Exists('$(ManagedDir)\BeatmapCore.dll')" />
+    <Reference Include="Colors" HintPath="$(ManagedDir)\Colors.dll" Publicize="true" Condition="Exists('$(ManagedDir)\Colors.dll')" />
+    <Reference Include="DataModels" HintPath="$(ManagedDir)\DataModels.dll" Condition="Exists('$(ManagedDir)\DataModels.dll')" />
+    <Reference Include="GameplayCore" HintPath="$(ManagedDir)\GameplayCore.dll" Condition="Exists('$(ManagedDir)\GameplayCore.dll')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="UI\GameplaySetupTab.bsml" />
+    <EmbeddedResource Include="Manifests\$(ChromasonProfile)\manifest.json" LogicalName="Chromason.manifest.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LegatoBS" Version="0.1.1" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

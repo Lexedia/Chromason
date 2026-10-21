@@ -1,0 +1,14 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Chromason.user.props" Condition="Exists('$(MSBuildThisFileDirectory)Chromason.user.props')" />
+
+  <PropertyGroup>
+    <LegatoSourceVersion>1.40.8</LegatoSourceVersion>
+    <LegatoTargetVersion Condition="'$(LegatoTargetVersion)' == '' AND Exists('$(BeatSaberDir)\BeatSaberVersion.txt')">$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('$(BeatSaberDir)\BeatSaberVersion.txt').Trim()), '_.*$', ''))</LegatoTargetVersion>
+    <LegatoTargetVersion Condition="'$(LegatoTargetVersion)' == ''">1.40.8</LegatoTargetVersion>
+    <BaseIntermediateOutputPath>obj\$(LegatoTargetVersion)\</BaseIntermediateOutputPath>
+
+    <ChromasonProfile Condition="$(LegatoTargetVersion.StartsWith('1.29.'))">1.29.0</ChromasonProfile>
+    <ChromasonProfile Condition="$(LegatoTargetVersion.StartsWith('1.40.'))">1.40.0</ChromasonProfile>
+    <ChromasonProfile Condition="$(LegatoTargetVersion.StartsWith('1.42.')) OR $(LegatoTargetVersion.StartsWith('1.43.')) OR $(LegatoTargetVersion.StartsWith('1.44.'))">1.42.0</ChromasonProfile>
+  </PropertyGroup>
+</Project>
