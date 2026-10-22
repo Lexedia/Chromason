@@ -24,7 +24,11 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
     private FogState _chromaFog;
 
     private bool _prepared;
-    private Applied _applied;
+
+    private List<Transform>? _offsetRoots;
+    private int _offsetCount;
+    private int _swappedCount;
+    private bool _fogSwapped;
 
     private EnvironmentReverter(PluginConfig config, [InjectOptional] Dictionary<string, Track>? tracks)
     {
@@ -55,63 +59,62 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
             return;
         }
 
-        if (!_config.EnvironmentEnhancementsDisabledFor(view))
+        var vanilla = _config.EnvironmentEnhancementsDisabledFor(view);
+        _offsetRoots = vanilla ? _addedRoots : _removedRoots;
+        for (; _offsetCount < _offsetRoots.Count; _offsetCount++)
         {
-            Offset(_removedRoots, HiddenOffset);
-            _applied = Applied.RemovedHidden;
+            if (_offsetRoots[_offsetCount] is { } root && root != null)
+            {
+                root.position += HiddenOffset;
+            }
+        }
+
+        if (!vanilla)
+        {
             return;
         }
 
-        _applied = Applied.Vanilla;
-        Offset(_addedRoots, HiddenOffset);
-
-        foreach (var moved in _movedObjects)
+        for (; _swappedCount < _movedObjects.Count; _swappedCount++)
         {
-            moved.SwapToOriginal();
+            _movedObjects[_swappedCount].SwapToOriginal();
         }
 
         if (_originalFog is { } originalFog)
         {
             _chromaFog = FogState.CaptureGlobal();
+            _fogSwapped = true;
             originalFog.Apply();
-            _applied = Applied.VanillaWithFog;
         }
     }
 
     public void Restore()
     {
-        switch (_applied)
+        if (_fogSwapped)
         {
-            case Applied.RemovedHidden:
-                Offset(_removedRoots, -HiddenOffset);
-                break;
-            case Applied.Vanilla or Applied.VanillaWithFog:
-                if (_applied == Applied.VanillaWithFog)
-                {
-                    _chromaFog.Apply();
-                }
-
-                for (var i = _movedObjects.Count - 1; i >= 0; i--)
-                {
-                    _movedObjects[i].SwapBack();
-                }
-
-                Offset(_addedRoots, -HiddenOffset);
-                break;
+            _chromaFog.Apply();
+            _fogSwapped = false;
         }
 
-        _applied = Applied.Nothing;
-    }
-
-    private static void Offset(List<Transform> roots, Vector3 offset)
-    {
-        foreach (var root in roots)
+        for (var i = _swappedCount - 1; i >= 0; i--)
         {
-            if (root != null)
+            _movedObjects[i].SwapBack();
+        }
+
+        _swappedCount = 0;
+
+        if (_offsetRoots != null)
+        {
+            for (var i = _offsetCount - 1; i >= 0; i--)
             {
-                root.position += offset;
+                if (_offsetRoots[i] is { } root && root != null)
+                {
+                    root.position -= HiddenOffset;
+                }
             }
         }
+
+        _offsetRoots = null;
+        _offsetCount = 0;
     }
 
     private void Prepare(EnvironmentSnapshot before)
@@ -210,7 +213,6 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
         private readonly bool _rotation;
         private readonly bool _scale;
         private TransformState _current;
-        private bool _swapped;
 
         private MovedObject(Transform transform, TransformState original, bool position, bool rotation, bool scale)
         {
@@ -243,7 +245,6 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
             }
 
             _current = TransformState.Capture(_transform);
-            _swapped = true;
 
             if (_position)
             {
@@ -263,24 +264,14 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
 
         internal void SwapBack()
         {
-            if (!_swapped || _transform == null)
+            if (_transform == null)
             {
                 return;
             }
-
-            _swapped = false;
 
             _transform.localPosition = _current.LocalPosition;
             _transform.localRotation = _current.LocalRotation;
             _transform.localScale = _current.LocalScale;
         }
-    }
-
-    private enum Applied
-    {
-        Nothing,
-        RemovedHidden,
-        Vanilla,
-        VanillaWithFog
     }
 }
