@@ -49,11 +49,11 @@ internal class NoteColourReverter : ObjectColouriserReverter
         }
     }
 
-    public override void Apply()
+    public override void Apply(ViewKind view)
     {
-        base.Apply();
+        base.Apply(view);
 
-        if (!NoteTweaksCompat.Available)
+        if ((!ClearChroma && !UseOwnColours) || !NoteTweaksCompat.Available)
         {
             return;
         }

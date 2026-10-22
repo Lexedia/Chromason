@@ -19,9 +19,6 @@ internal class ArcColourReverter : IViewReverter
 
     private readonly List<(MaterialPropertyBlockController Controller, Color Colour)> _saved = [];
 
-    private bool _clearChroma;
-    private bool _useOwnColours;
-
     private ArcColourReverter(
         PluginConfig config,
         ColourSchemes schemes,
@@ -34,21 +31,21 @@ internal class ArcColourReverter : IViewReverter
         _manager = manager;
     }
 
-    public bool ShouldApply(ViewKind view)
+    public void Apply(ViewKind view)
     {
         if (_manager == null)
         {
-            return false;
+            return;
         }
 
-        _clearChroma = _config.NoteColouringDisabledFor(view) || _config.ChromaEventsDisabledFor(view);
-        _useOwnColours = _schemes.HasMapColours && _config.MapColoursDisabledFor(view);
-        return _clearChroma || _useOwnColours;
-    }
+        var clearChroma = _config.NoteColouringDisabledFor(view) || _config.ChromaEventsDisabledFor(view);
+        var useOwnColours = _schemes.HasMapColours && _config.MapColoursDisabledFor(view);
+        if (!clearChroma && !useOwnColours)
+        {
+            return;
+        }
 
-    public void Apply()
-    {
-        foreach (var pair in _manager!.Colorizers)
+        foreach (var pair in _manager.Colorizers)
         {
             var arc = pair.Key;
             if (arc == null || !arc.isActiveAndEnabled)
@@ -60,8 +57,8 @@ internal class ArcColourReverter : IViewReverter
             var chromaColoured = colouriser._color != null || colouriser.GlobalColorGetter != null;
             var colourType = arc.sliderData.colorType;
 
-            var colour = _clearChroma ? _colourManager.ColorForType(colourType) : arc._initColor;
-            if (_useOwnColours && (_clearChroma || !chromaColoured))
+            var colour = clearChroma ? _colourManager.ColorForType(colourType) : arc._initColor;
+            if (useOwnColours && (clearChroma || !chromaColoured))
             {
                 colour = colourType == ColorType.ColorB ? _schemes.Own!.saberBColor : _schemes.Own!.saberAColor;
             }

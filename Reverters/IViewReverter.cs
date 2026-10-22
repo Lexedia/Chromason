@@ -4,11 +4,15 @@ namespace Chromason.Reverters;
 
 internal interface IViewReverter
 {
-    bool ShouldApply(ViewKind view);
+    /// <summary>
+    /// Called before a camera culls: swaps Chroma's state for what <paramref name="view"/> should show, if anything,
+    /// and remembers what it changed.
+    /// </summary>
+    void Apply(ViewKind view);
 
-    /// <summary>Called before the camera culls: swap Chroma's state for the vanilla one.</summary>
-    void Apply();
-
-    /// <summary>Called after the camera rendered: put Chroma's state back exactly as it was.</summary>
+    /// <summary>
+    /// Called after the camera rendered: puts back exactly what the last <see cref="Apply"/> changed, and nothing if it
+    /// changed nothing. Must not depend on anything decided outside <see cref="Apply"/>.
+    /// </summary>
     void Restore();
 }

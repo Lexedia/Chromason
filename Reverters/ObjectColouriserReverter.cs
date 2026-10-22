@@ -10,12 +10,11 @@ internal abstract class ObjectColouriserReverter : IViewReverter
     private readonly List<ObjectColorizer> _colourisers = [];
     private readonly List<Color?> _savedColours = [];
 
-    private bool _clearChroma;
-    private bool _useOwnColours;
+    private bool _clearedGlobalColour;
 
-    protected bool ClearChroma => _clearChroma;
+    protected bool ClearChroma { get; private set; }
 
-    protected bool UseOwnColours => _useOwnColours;
+    protected bool UseOwnColours { get; private set; }
 
     protected abstract bool IsAvailable { get; }
 
@@ -31,23 +30,19 @@ internal abstract class ObjectColouriserReverter : IViewReverter
 
     protected abstract void RestoreGlobalColour();
 
-    public bool ShouldApply(ViewKind view)
+    public virtual void Apply(ViewKind view)
     {
-        if (!IsAvailable)
+        ClearChroma = IsAvailable && ClearsChromaFor(view);
+        UseOwnColours = IsAvailable && UsesOwnColoursFor(view);
+        if (!ClearChroma && !UseOwnColours)
         {
-            return false;
+            return;
         }
 
-        _clearChroma = ClearsChromaFor(view);
-        _useOwnColours = UsesOwnColoursFor(view);
-        return _clearChroma || _useOwnColours;
-    }
-
-    public virtual void Apply()
-    {
-        if (_clearChroma)
+        if (ClearChroma)
         {
             ClearGlobalColour();
+            _clearedGlobalColour = true;
         }
 
         CollectColourisers(_colourisers);
@@ -56,12 +51,12 @@ internal abstract class ObjectColouriserReverter : IViewReverter
         {
             _savedColours.Add(colouriser._color);
 
-            if (_clearChroma)
+            if (ClearChroma)
             {
                 colouriser._color = null;
             }
 
-            if (_useOwnColours && colouriser._color == null && colouriser.GlobalColorGetter == null)
+            if (UseOwnColours && colouriser._color == null && colouriser.GlobalColorGetter == null)
             {
                 colouriser._color = OwnColour(colouriser);
             }
@@ -72,9 +67,10 @@ internal abstract class ObjectColouriserReverter : IViewReverter
 
     public virtual void Restore()
     {
-        if (_clearChroma)
+        if (_clearedGlobalColour)
         {
             RestoreGlobalColour();
+            _clearedGlobalColour = false;
         }
 
         for (var i = 0; i < _savedColours.Count; i++)

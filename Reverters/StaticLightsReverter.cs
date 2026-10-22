@@ -43,20 +43,20 @@ internal class StaticLightsReverter : LightSwapReverter
 
     protected override bool HandlesVanillaLights => true;
 
-    public override bool ShouldApply(ViewKind view)
+    public override void Apply(ViewKind view)
     {
         if (!HasLights || !_config.StaticLightsFor(view))
         {
-            return false;
+            return;
         }
 
         _useOwnColours = _schemes.HasMapColours && _config.MapColoursDisabledFor(view);
 
-        return !NativeStaticLightsPatch.IsActive || _useOwnColours;
-    }
+        if (NativeStaticLightsPatch.IsActive && !_useOwnColours)
+        {
+            return;
+        }
 
-    public override void Apply()
-    {
         if (!_captured || (_capturedBeforeEnvironment && EnvironmentCapture.Completed))
         {
             _captured = true;
@@ -64,7 +64,7 @@ internal class StaticLightsReverter : LightSwapReverter
             Capture();
         }
 
-        base.Apply();
+        SwapLights();
 
         foreach (var pose in _staticPoses)
         {

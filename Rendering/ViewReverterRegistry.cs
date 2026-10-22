@@ -63,7 +63,7 @@ internal class ViewReverterRegistry : IInitializable, IDisposable
 
         foreach (var reverter in _reverters)
         {
-            if (_failed.Contains(reverter) || !reverter.ShouldApply(view))
+            if (_failed.Contains(reverter))
             {
                 continue;
             }
@@ -71,7 +71,7 @@ internal class ViewReverterRegistry : IInitializable, IDisposable
             _applied.Add(reverter);
             try
             {
-                reverter.Apply();
+                reverter.Apply(view);
             }
             catch (Exception exception)
             {

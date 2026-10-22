@@ -19,15 +19,17 @@ internal class LightColourReverter : LightSwapReverter
         _config = config;
     }
 
-    public override bool ShouldApply(ViewKind view) =>
-        Manager != null && _config.ChromaEventsDisabledFor(view) && !_config.StaticLightsFor(view);
-
     protected override bool TryGetColour(LightSwitchEventEffect effect, out Color colour) =>
         VanillaLightShadow.TryGetColour(effect, out colour);
 
-    public override void Apply()
+    public override void Apply(ViewKind view)
     {
-        base.Apply();
+        if (Manager == null || !_config.ChromaEventsDisabledFor(view) || _config.StaticLightsFor(view))
+        {
+            return;
+        }
+
+        SwapLights();
 
         if (!_loggedFirstApply)
         {

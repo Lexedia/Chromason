@@ -36,11 +36,11 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
 
     protected IReadOnlyList<LightGroup> Groups => _groups;
 
-    public abstract bool ShouldApply(ViewKind view);
+    public abstract void Apply(ViewKind view);
 
     protected abstract bool TryGetColour(LightSwitchEventEffect effect, out Color colour);
 
-    public virtual void Apply()
+    protected void SwapLights()
     {
         CollectGroups();
 
