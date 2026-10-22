@@ -2,6 +2,10 @@
 
 Walls off Chroma for your pretty eyes, but keep it fancy for other people to see it :D
 
+<img width="64" height="64" alt="son" src="https://github.com/user-attachments/assets/a7f5fae1-4387-4651-b7f2-e3c93a40fd21" />
+
+(The name was just a portmanteau of Chroma and mason, but now the kirk worms have taken upon my brain. I'm very sorry)
+
 ## How it works
 
 Chroma's own settings can't be split by camera. It decides when a level loads which features run and which
