@@ -31,11 +31,6 @@ internal class ViewSwitchBehaviour : MonoBehaviour
 
     protected void OnPostRender()
     {
-        if (_camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Left)
-        {
-            return;
-        }
-
         ViewReverterRegistry.Current?.RestoreFor(_camera);
     }
 }

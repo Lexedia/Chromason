@@ -15,7 +15,6 @@ namespace Chromason.Reverters;
 internal abstract class LightSwapReverter(LightColorizerManager? manager) : IViewReverter, IDisposable
 {
     private readonly List<LightGroup> _groups = [];
-    private readonly Dictionary<ChromaLightSwitchEventEffect, List<ILightWithId>> _chromaLights = [];
     private readonly List<(ILightWithId Light, Color Colour)> _swappedLights = [];
 
     private readonly HashSet<LightWithIds> _deferredParents = [];
@@ -51,9 +50,11 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
                 continue;
             }
 
-            foreach (var light in group.Lights)
+            foreach (var light in group)
             {
-                if (light is not { isRegistered: true } || !TryGetRealColour(group, light, out var realColour))
+                if (light is not { isRegistered: true } ||
+                    !TryGetRealColour(group, light, out var realColour) ||
+                    realColour == colour)
                 {
                     continue;
                 }
@@ -103,19 +104,7 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
             foreach (var colouriser in Manager.Colorizers.Values)
             {
                 var effect = colouriser.ChromaLightSwitchEventEffect;
-                if (!_chromaLights.TryGetValue(effect, out var lights))
-                {
-                    lights = [];
-                    _chromaLights[effect] = lights;
-                }
-
-                lights.Clear();
-                foreach (var light in effect.ColorTweens.Keys)
-                {
-                    lights.Add(light);
-                }
-
-                _groups.Add(new LightGroup(effect.LightSwitchEventEffect, lights));
+                _groups.Add(new LightGroup(effect.LightSwitchEventEffect, effect.ColorTweens));
             }
 
             return;
@@ -193,12 +182,41 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
     protected readonly struct LightGroup
     {
         internal readonly LightSwitchEventEffect Effect;
-        internal readonly List<ILightWithId> Lights;
+        private readonly Dictionary<ILightWithId, ChromaIDColorTween>? _chromaLights;
+        private readonly List<ILightWithId>? _lights;
+
+        internal LightGroup(LightSwitchEventEffect effect, Dictionary<ILightWithId, ChromaIDColorTween> chromaLights)
+        {
+            Effect = effect;
+            _chromaLights = chromaLights;
+            _lights = null;
+        }
 
         internal LightGroup(LightSwitchEventEffect effect, List<ILightWithId> lights)
         {
             Effect = effect;
-            Lights = lights;
+            _chromaLights = null;
+            _lights = lights;
+        }
+
+        public Enumerator GetEnumerator() => new(_chromaLights, _lights);
+
+        public struct Enumerator
+        {
+            private readonly bool _chroma;
+            private Dictionary<ILightWithId, ChromaIDColorTween>.KeyCollection.Enumerator _chromaLights;
+            private List<ILightWithId>.Enumerator _lights;
+
+            internal Enumerator(Dictionary<ILightWithId, ChromaIDColorTween>? chromaLights, List<ILightWithId>? lights)
+            {
+                _chroma = chromaLights != null;
+                _chromaLights = chromaLights != null ? chromaLights.Keys.GetEnumerator() : default;
+                _lights = lights != null ? lights.GetEnumerator() : default;
+            }
+
+            public ILightWithId Current => _chroma ? _chromaLights.Current : _lights.Current;
+
+            public bool MoveNext() => _chroma ? _chromaLights.MoveNext() : _lights.MoveNext();
         }
     }
 }

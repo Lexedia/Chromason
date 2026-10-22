@@ -172,7 +172,7 @@ internal class StaticLightsReverter : LightSwapReverter
                 continue;
             }
 
-            foreach (var light in group.Lights)
+            foreach (var light in group)
             {
                 if (light is LightWithIds.LightWithId || light is not Component component || component == null)
                 {

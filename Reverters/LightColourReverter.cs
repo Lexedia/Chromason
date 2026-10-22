@@ -34,7 +34,7 @@ internal class LightColourReverter : LightSwapReverter
         if (!_loggedFirstApply)
         {
             _loggedFirstApply = true;
-            Plugin.Log.Debug($"Lights: {Manager!.Colorizers.Count} groups, {VanillaLightShadow.ShadowedCount} shadowed, {SwappedLightCount} lights shown in vanilla colours");
+            Plugin.Log.Debug($"Lights: {Manager!.Colorizers.Count} groups, {VanillaLightShadow.ShadowedCount} shadowed, {SwappedLightCount} lights differing from Chroma on the first render");
         }
     }
 }
