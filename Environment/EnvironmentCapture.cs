@@ -41,9 +41,16 @@ internal static class EnvironmentCapture
 
     private static void Postfix(bool __result)
     {
-        if (!__result)
+        if (__result)
         {
-            Completed = true;
+            return;
+        }
+
+        Completed = true;
+
+        if (Before == null && PluginConfig.Instance.EnvironmentEnhancementsDisabledAnywhere)
+        {
+            Plugin.Log.Warn("Chroma built the environment without a snapshot before it, its DelayedStart probably changed: environment changes won't be undone this level");
         }
     }
 }
