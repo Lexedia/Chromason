@@ -13,7 +13,10 @@ internal static class NoteTweaksCompat
 
     private static readonly Dictionary<NoteControllerBase, NoteVariants> Variants = [];
 
+    private static readonly System.Action<ScoreController, NoteController> NoOriginal = (_, _) => { };
+
     private static MethodInfo? _setNoteColour;
+    private static bool _takesOriginal;
     private static MethodInfo? _patchColours;
     private static FieldInfo? _patchedSchemeField;
 
@@ -33,7 +36,9 @@ internal static class NoteTweaksCompat
             return;
         }
 
-        _setNoteColour = AccessTools.Method(hook, "SetNoteControllerColor", [typeof(NoteController)]);
+        _setNoteColour = AccessTools.Method(hook, "SetNoteControllerColor", [typeof(NoteController)])
+            ?? AccessTools.Method(hook, "SetNoteControllerColor", [typeof(System.Action<ScoreController, NoteController>), typeof(ScoreController), typeof(NoteController)]);
+        _takesOriginal = _setNoteColour?.GetParameters().Length == 3;
         _patchColours = AccessTools.Method(colourTweaks, "PatchColors");
         _patchedSchemeField = AccessTools.Field(colourTweaks, "_patchedScheme");
 
@@ -131,7 +136,7 @@ internal static class NoteTweaksCompat
     private static Color[] Recolour(NoteController note, List<MaterialPropertyBlockController> controllers, MaterialPropertyBlockController body, Color colour)
     {
         body.materialPropertyBlock.SetColor(ColourId, colour);
-        _setNoteColour!.Invoke(null, [note]);
+        _setNoteColour!.Invoke(null, _takesOriginal ? new object?[] { NoOriginal, null, note } : [note]);
         return Read(controllers);
     }
 
