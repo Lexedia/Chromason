@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HarmonyLib;
 using UnityEngine;
 
 namespace Chromason.Colours;
@@ -7,6 +8,10 @@ namespace Chromason.Colours;
 internal static class LightColourSchemeSwap
 {
     private static readonly List<(SimpleColorSO Asset, Color Colour)> SavedAssets = [];
+
+    // me when reflection
+    private static readonly AccessTools.FieldRef<ColorManager, ColorScheme?> SchemeOf =
+        AccessTools.FieldRefAccess<ColorManager, ColorScheme?>(nameof(ColorManager._colorScheme));
 
     internal static SchemeSwapScope Begin(LightSwitchEventEffect effect, ColorScheme scheme)
     {
@@ -24,7 +29,7 @@ internal static class LightColourSchemeSwap
 
         if (effect._colorManager != null)
         {
-            effect._colorManager._colorScheme = scheme;
+            SchemeOf(effect._colorManager) = scheme;
         }
 
         return scope;
@@ -75,7 +80,7 @@ internal static class LightColourSchemeSwap
 
             if (_colourManager != null)
             {
-                _colourManager._colorScheme = _previousScheme;
+                SchemeOf(_colourManager) = _previousScheme;
             }
         }
     }

@@ -9,15 +9,22 @@ using HarmonyLib;
 
 namespace Chromason.Lighting;
 
-// TODO: 1.29 1.29 1.29 1.29 1.29 AAAAAAAAAAAh
-#if !BEAT_SABER_1_29_0
 [HarmonyPatch]
-#endif
 internal static class NativeStaticLightsPatch
 {
     internal static bool IsActive { get; private set; }
 
-#if !BEAT_SABER_1_29_0
+#if BEAT_SABER_1_29_0
+    private static IEnumerable<MethodBase> TargetMethods()
+    {
+        yield return AccessTools.Method(typeof(BeatmapDataLoader), nameof(BeatmapDataLoader.GetBeatmapDataFromSaveData));
+    }
+
+    private static void Prefix(BeatmapDifficulty beatmapDifficulty, ref PlayerSpecificSettings? playerSpecificSettings)
+    {
+        LoadStatic(beatmapDifficulty, ref playerSpecificSettings);
+    }
+#else
     private static IEnumerable<MethodBase> TargetMethods()
     {
         yield return AccessTools.Method(typeof(BeatmapDataLoader), nameof(BeatmapDataLoader.LoadBeatmapDataAsync));
@@ -25,6 +32,12 @@ internal static class NativeStaticLightsPatch
     }
 
     private static void Prefix(BeatmapKey beatmapKey, ref PlayerSpecificSettings? playerSpecificSettings)
+    {
+        LoadStatic(beatmapKey.difficulty, ref playerSpecificSettings);
+    }
+#endif
+
+    private static void LoadStatic(BeatmapDifficulty difficulty, ref PlayerSpecificSettings? playerSpecificSettings)
     {
         if (playerSpecificSettings == null)
         {
@@ -40,7 +53,6 @@ internal static class NativeStaticLightsPatch
                 environmentEffectsFilterExpertPlusPreset: EnvironmentEffectsFilterPreset.NoEffects);
         }
 
-        IsActive = playerSpecificSettings.GetEnvironmentEffectsFilterPreset(beatmapKey.difficulty) == EnvironmentEffectsFilterPreset.NoEffects;
+        IsActive = playerSpecificSettings.GetEnvironmentEffectsFilterPreset(difficulty) == EnvironmentEffectsFilterPreset.NoEffects;
     }
-#endif
 }

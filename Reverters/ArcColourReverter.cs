@@ -90,11 +90,7 @@ internal class ArcColourReverter : IViewReverter
 
     private static void Write(MaterialPropertyBlockController controller, Color colour)
     {
-        var block = controller.materialPropertyBlock;
-        block.SetColor(ColourId, colour);
-        foreach (var renderer in controller._renderers)
-        {
-            renderer.SetPropertyBlock(block);
-        }
+        controller.materialPropertyBlock.SetColor(ColourId, colour);
+        controller.ApplyChanges();
     }
 }

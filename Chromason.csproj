@@ -33,7 +33,7 @@
     <Reference Include="HMLib" HintPath="$(ManagedDir)\HMLib.dll" />
     <Reference Include="HMRendering" HintPath="$(ManagedDir)\HMRendering.dll" Publicize="true" />
     <Reference Include="HMUI" HintPath="$(ManagedDir)\HMUI.dll" />
-    <Reference Include="Tweening" HintPath="$(ManagedDir)\Tweening.dll" />
+    <Reference Include="Tweening" HintPath="$(ManagedDir)\Tweening.dll" Condition="Exists('$(ManagedDir)\Tweening.dll')" />
     <Reference Include="Zenject" HintPath="$(ManagedDir)\Zenject.dll" />
     <Reference Include="Zenject-usage" HintPath="$(ManagedDir)\Zenject-usage.dll" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedDir)\UnityEngine.CoreModule.dll" />

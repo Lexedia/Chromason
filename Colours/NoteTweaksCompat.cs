@@ -23,6 +23,9 @@ internal static class NoteTweaksCompat
 
     internal static void Initialise()
     {
+#if BEAT_SABER_1_29_0
+        // NoteTweaks doesnt support 1.29
+#else
         var hook = AccessTools.TypeByName("NoteTweaks.Hooks.SetGameNoteControllerColorHook");
         var colourTweaks = AccessTools.TypeByName("NoteTweaks.Patches.NoteColorTweaks");
         if (hook == null || colourTweaks == null)
@@ -41,6 +44,7 @@ internal static class NoteTweaksCompat
         }
 
         Plugin.Log.Debug("NoteTweaks found, note colours will follow it");
+#endif
     }
 
     internal static ColorScheme? Patch(ColorScheme scheme)
@@ -88,7 +92,7 @@ internal static class NoteTweaksCompat
         }
 
         var body = visuals.transform.GetChild(0).GetComponent<MaterialPropertyBlockController>();
-        if (body == null || !body.materialPropertyBlock.HasColor(ColourId))
+        if (body == null || !HasColour(body))
         {
             return;
         }
@@ -96,7 +100,7 @@ internal static class NoteTweaksCompat
         var controllers = new List<MaterialPropertyBlockController>();
         foreach (var controller in noteController.GetComponentsInChildren<MaterialPropertyBlockController>(true))
         {
-            if (controller.materialPropertyBlock.HasColor(ColourId))
+            if (HasColour(controller))
             {
                 controllers.Add(controller);
             }
@@ -113,6 +117,15 @@ internal static class NoteTweaksCompat
 
         Write(controllers, live);
         Variants[noteController] = new NoteVariants([.. controllers], scheme, own);
+    }
+
+    private static bool HasColour(MaterialPropertyBlockController controller)
+    {
+#if BEAT_SABER_1_29_0
+        return false;
+#else
+        return controller.materialPropertyBlock.HasColor(ColourId);
+#endif
     }
 
     private static Color[] Recolour(NoteController note, List<MaterialPropertyBlockController> controllers, MaterialPropertyBlockController body, Color colour)
@@ -147,12 +160,8 @@ internal static class NoteTweaksCompat
                 continue;
             }
 
-            var block = controller.materialPropertyBlock;
-            block.SetColor(ColourId, colours[i]);
-            foreach (var renderer in controller._renderers)
-            {
-                renderer.SetPropertyBlock(block);
-            }
+            controller.materialPropertyBlock.SetColor(ColourId, colours[i]);
+            controller.ApplyChanges();
         }
     }
 
