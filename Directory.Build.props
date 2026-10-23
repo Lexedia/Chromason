@@ -10,5 +10,9 @@
     <ChromasonProfile Condition="$(LegatoTargetVersion.StartsWith('1.29.'))">1.29.0</ChromasonProfile>
     <ChromasonProfile Condition="$(LegatoTargetVersion.StartsWith('1.40.'))">1.40.0</ChromasonProfile>
     <ChromasonProfile Condition="$(LegatoTargetVersion.StartsWith('1.42.')) OR $(LegatoTargetVersion.StartsWith('1.43.')) OR $(LegatoTargetVersion.StartsWith('1.44.'))">1.42.0</ChromasonProfile>
+
+    <ChromasonGameVersions Condition="'$(ChromasonProfile)' == '1.29.0'">1.29.0-to-1.29.1</ChromasonGameVersions>
+    <ChromasonGameVersions Condition="'$(ChromasonProfile)' == '1.40.0'">1.40.0-to-1.40.8</ChromasonGameVersions>
+    <ChromasonGameVersions Condition="'$(ChromasonProfile)' == '1.42.0'">1.42.0-to-1.44.1</ChromasonGameVersions>
   </PropertyGroup>
 </Project>
