@@ -13,6 +13,8 @@ internal class PluginConfig
     public virtual bool HeadsetEnabled { get; set; } = true;
     public virtual bool DesktopEnabled { get; set; } = false;
 
+    public virtual bool OwnSabreColours { get; set; } = false;
+
     public virtual bool ChromaEventsDisabledInHeadset { get; set; } = true;
     public virtual bool ChromaEventsDisabledOnDesktop { get; set; } = true;
 

@@ -5,6 +5,8 @@
                       hover-hint="Undo Chroma in the headset, as chosen in Headset settings" />
       <toggle-setting text="Desktop" value="desktop-enabled" apply-on-change="true"
                       hover-hint="Undo Chroma on desktop cameras (Camera2, ReeCamera...), as chosen in Desktop settings" />
+      <toggle-setting text="Own sabre colours" value="own-sabre-colours" apply-on-change="true"
+                      hover-hint="Sabres use your colour scheme instead of the map's or Chroma's, in every view" />
     </modifier-container>
     <text text="ImBlindedByTheLights is installed and conflicts with Chromason, disable one of them"
           active="~ibbtl-installed" font-size="3" font-color="#FF7070" align="Center" word-wrapping="true" />

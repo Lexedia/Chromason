@@ -54,6 +54,13 @@ internal class GameplaySetupTab : IInitializable, IDisposable
         set => Config.DesktopEnabled = value;
     }
 
+    [UIValue("own-sabre-colours")]
+    private bool OwnSabreColours
+    {
+        get => Config.OwnSabreColours;
+        set => Config.OwnSabreColours = value;
+    }
+
     [UIValue("chroma-events-headset")]
     private bool ChromaEventsDisabledInHeadset
     {

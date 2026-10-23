@@ -23,9 +23,11 @@ I've been heavily inspired by [kinsi55](https://github.com/kinsi55)'s [ImBlinded
 ## Known limitations
 
 - A map that forces a different environment can't be undone, since there is only one environment in the scene. The headset gets the map's environment with Chroma's additions hidden and moves reverted.
-- Not reverted: Chroma's ring and laser speed or rotation changes, particle colours, saber colours, and material changes.
+- Not reverted: Chroma's ring and laser speed or rotation changes, particle colours, and material changes when Chroma **is disabled** in that view.
 - Vanilla lights are computed once, so they use your own colours if *any* view has both "no Chroma events" and "no map colours" on. Lights keep the map's colours in a view that only has "no map colours" on.
-- Static lights in a single view are applied per camera, and may miss lights on the newer environments that use group lighting. With static lights in both views, the level loads with the game's own static lights instead, the same as its "Static lights" setting.
+- Static lights in a single view are applied per camera, and may miss lights on the newer environments that use GSL. With static lights in both views, the level loads with the game's own static lights instead, the same as its "Static lights -> No Effects" setting.
+- Sabres colours are global, meaning you either get your own sabres colours from your colour scheme, or the map's colour scheme. A per view override would be too much code to maintain for little gains.
+<sub>Even if I were to implement such thing (which I will not), mods like ReeSabers implement setting custom colours for your sabres, which I'm sure would break with Chromason; sorgy :c</sub>
 
 ## Building
 

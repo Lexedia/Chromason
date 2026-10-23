@@ -11,7 +11,7 @@ internal class PlayerInstaller : Installer
     public override void InstallBindings()
     {
         Container.BindInstance(PluginConfig.Instance);
-        Container.BindInterfacesAndSelfTo<ColourSchemes>().AsSingle();
+        Container.BindInterfacesAndSelfTo<ColourSchemes>().AsSingle().NonLazy();
 
         if (NoteTweaksCompat.Available)
         {

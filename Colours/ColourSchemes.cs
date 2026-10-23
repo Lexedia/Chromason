@@ -1,10 +1,11 @@
 using System;
+using Chromason.Configuration;
 
 namespace Chromason.Colours;
 
 internal class ColourSchemes : IDisposable
 {
-    private ColourSchemes(ColorManager colourManager)
+    private ColourSchemes(ColorManager colourManager, PluginConfig config)
     {
         var level = colourManager._colorScheme;
         Own = OwnColourSchemeCapture.Captured;
@@ -22,6 +23,11 @@ internal class ColourSchemes : IDisposable
             NoteTweaksCompat.Level = (colourManager, HasMapColours ? Own : null);
         }
 
+        if (config.OwnSabreColours && Own != null)
+        {
+            SabreColourOverride.Colours = (Own.saberAColor, Own.saberBColor);
+        }
+
         Plugin.Log.Debug($"Colours: level uses {level?.colorSchemeId}, own is {OwnColourSchemeCapture.Captured?.colorSchemeId}, NoteTweaks: {noteTweaks}, map colours: {HasMapColours}");
     }
 
@@ -32,6 +38,7 @@ internal class ColourSchemes : IDisposable
     public void Dispose()
     {
         NoteTweaksCompat.Clear();
+        SabreColourOverride.Colours = null;
     }
 
     private static bool SameColours(ColorScheme a, ColorScheme b) =>
