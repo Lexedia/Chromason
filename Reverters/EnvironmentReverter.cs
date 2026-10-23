@@ -131,6 +131,14 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
             }
         }
 
+        foreach (var gameObject in EnvironmentCapture.Geometry)
+        {
+            if (gameObject != null)
+            {
+                added.Add(gameObject);
+            }
+        }
+
         var removed = new HashSet<GameObject>();
         foreach (var pair in before.Objects)
         {

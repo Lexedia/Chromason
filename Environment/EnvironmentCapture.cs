@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Reflection;
 using Chroma.EnvironmentEnhancement;
 using Chromason.Configuration;
 using HarmonyLib;
+using UnityEngine;
 
 namespace Chromason.Environment;
 
@@ -14,10 +16,13 @@ internal static class EnvironmentCapture
 
     internal static bool Completed { get; private set; }
 
+    internal static List<GameObject> Geometry { get; } = [];
+
     internal static void Reset()
     {
         Before = null;
         Completed = false;
+        Geometry.Clear();
     }
 
     private static MethodBase TargetMethod() =>
@@ -51,6 +56,18 @@ internal static class EnvironmentCapture
         if (Before == null && PluginConfig.Instance.EnvironmentEnhancementsDisabledAnywhere)
         {
             Plugin.Log.Warn("Chroma built the environment without a snapshot before it, its DelayedStart probably changed: environment changes won't be undone this level");
+        }
+    }
+
+    [HarmonyPatch(typeof(GeometryFactory), nameof(GeometryFactory.Create))]
+    private static class GeometryCapture
+    {
+        private static void Postfix(GameObject __result)
+        {
+            if (Before != null && __result != null)
+            {
+                Geometry.Add(__result);
+            }
         }
     }
 }
