@@ -90,7 +90,7 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
         _deferredBloomLights.Clear();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         ChromaLightColourCache.Clear();
     }

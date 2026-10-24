@@ -25,6 +25,8 @@ internal class PlayerInstaller : Installer
         Container.BindInterfacesTo<LightColourReverter>().AsSingle();
         Container.BindInterfacesTo<StaticLightsReverter>().AsSingle();
         Container.BindInterfacesTo<EnvironmentReverter>().AsSingle();
+        Container.BindInterfacesTo<VanillaMapColourReverter>().AsSingle();
+        Container.BindInterfacesTo<VanillaLightColourReverter>().AsSingle();
 
         Container.BindInterfacesTo<ViewReverterRegistry>().AsSingle();
     }

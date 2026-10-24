@@ -50,6 +50,23 @@ internal static class VanillaLightShadow
         }
     }
 
+    internal static void ShadowTwin(LightSwitchEventEffect twin, ColorScheme ownScheme)
+    {
+        _ownScheme = ownScheme;
+        Colours[twin] = Color.clear;
+
+        using var scope = BeginOwnScheme(twin);
+        try
+        {
+            twin.Start();
+        }
+        catch (Exception exception)
+        {
+            Colours.Remove(twin);
+            Plugin.Log.Error($"Could not shadow {twin.name}: {exception}");
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(nameof(LightSwitchEventEffect.HandleColorChangeBeatmapEvent))]
     private static void EventWithOwnScheme(LightSwitchEventEffect __instance, out LightColourSchemeSwap.SchemeSwapScope? __state)
