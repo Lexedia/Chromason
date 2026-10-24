@@ -1,13 +1,16 @@
 // Parts adapted from ImBlindedByTheLights by Kinsi (MIT, see LICENCE), https://github.com/kinsi55/BeatSaber_ImBlindedByTheLights
 // Based on LightSwitch and the light adapters (LightAdapters/).
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Chroma.Colorizer;
 using Chromason.Colours;
 using Chromason.Configuration;
 using Chromason.Environment;
 using Chromason.Lighting;
 using Chromason.Rendering;
+using HarmonyLib;
 using UnityEngine;
 using Zenject;
 
@@ -21,6 +24,7 @@ internal class StaticLightsReverter : LightSwapReverter
 
     private readonly PluginConfig _config;
     private readonly ColourSchemes _schemes;
+    private readonly Dictionary<BasicBeatmapEventType, (int Value, float Brightness)> _staticEvents;
 
     private readonly Dictionary<(LightSwitchEventEffect Effect, bool Own), Color> _colours = [];
     private readonly List<Pose> _staticPoses = [];
@@ -34,11 +38,12 @@ internal class StaticLightsReverter : LightSwapReverter
     private bool _capturedBeforeEnvironment;
     private bool _useOwnColours;
 
-    private StaticLightsReverter(PluginConfig config, ColourSchemes schemes, [InjectOptional] LightColorizerManager? manager)
+    private StaticLightsReverter(PluginConfig config, ColourSchemes schemes, DiContainer container, [InjectOptional] LightColorizerManager? manager)
         : base(manager)
     {
         _config = config;
         _schemes = schemes;
+        _staticEvents = StaticEvents(container);
     }
 
     protected override bool HandlesVanillaLights => true;
@@ -136,7 +141,7 @@ internal class StaticLightsReverter : LightSwapReverter
 
     protected override bool TryGetColour(LightSwitchEventEffect lightSwitch, out Color colour)
     {
-        if (!IsOn(lightSwitch))
+        if (!_staticEvents.TryGetValue(lightSwitch._event, out var staticEvent))
         {
             colour = Color.clear;
             return true;
@@ -150,15 +155,88 @@ internal class StaticLightsReverter : LightSwapReverter
 
         using (_useOwnColours ? LightColourSchemeSwap.Begin(lightSwitch, _schemes.Own!) : (LightColourSchemeSwap.SchemeSwapScope?)null)
         {
-            colour = lightSwitch.GetNormalColor(StaticOnValue, false);
+            colour = lightSwitch.GetNormalColor(staticEvent.Value, false);
+            colour.a *= staticEvent.Brightness;
         }
 
         _colours[key] = colour;
         return true;
     }
 
-    private static bool IsOn(LightSwitchEventEffect lightSwitch) =>
-        lightSwitch._event is BasicBeatmapEventType.Event0 or BasicBeatmapEventType.Event4;
+    private bool IsOn(LightSwitchEventEffect lightSwitch) => _staticEvents.ContainsKey(lightSwitch._event);
+
+    private static Dictionary<BasicBeatmapEventType, (int Value, float Brightness)> StaticEvents(DiContainer container)
+    {
+#if BEAT_SABER_1_29_0
+
+        if (BetterStaticLightsEvents() is { } staticEvents)
+        {
+            Plugin.Log.Debug($"Static lights follow BetterStaticLights: {staticEvents.Count} light sets on");
+            return staticEvents;
+        }
+#else
+        if (BetterLegacyLightsEvents(container) is { } legacyEvents)
+        {
+            Plugin.Log.Debug($"Static lights follow BetterLegacyLights: {legacyEvents.Count} light sets on");
+            return legacyEvents;
+        }
+#endif
+
+        return new()
+        {
+            [BasicBeatmapEventType.Event0] = (StaticOnValue, 1f),
+            [BasicBeatmapEventType.Event4] = (StaticOnValue, 1f)
+        };
+    }
+
+#if BEAT_SABER_1_29_0
+    private static Dictionary<BasicBeatmapEventType, (int Value, float Brightness)>? BetterStaticLightsEvents()
+    {
+        var pluginType = AccessTools.TypeByName("BetterStaticLights.Plugin");
+        if (pluginType == null || !Harmony.HasAnyPatches("bs.Exo.BetterStaticLights") ||
+            Traverse.Create(pluginType).Property("Instance").GetValue() is not { } plugin ||
+            Traverse.Create(plugin).Field("Config").Field("lightSets").GetValue() is not IEnumerable lightSets)
+        {
+            return null;
+        }
+
+        var events = new Dictionary<BasicBeatmapEventType, (int Value, float Brightness)>();
+        foreach (var item in lightSets)
+        {
+            var lightSet = Traverse.Create(item);
+            if (lightSet.Property<bool>("Enabled").Value)
+            {
+                events[lightSet.Field<BasicBeatmapEventType>("EventType").Value] =
+                    (lightSet.Property<bool>("UseSecondaryColor").Value ? 1 : 5, 1f);
+            }
+        }
+
+        return events;
+    }
+#else
+    private static Dictionary<BasicBeatmapEventType, (int Value, float Brightness)>? BetterLegacyLightsEvents(DiContainer container)
+    {
+        var configType = AccessTools.TypeByName("BetterLegacyLights.PluginConfig");
+        var lightSetType = AccessTools.TypeByName("BetterLegacyLights.LightSet");
+        if (configType == null || lightSetType == null || container.TryResolve(configType) is not { } config)
+        {
+            return null;
+        }
+
+        var events = new Dictionary<BasicBeatmapEventType, (int Value, float Brightness)>();
+        foreach (var property in configType.GetProperties().Where(property => property.PropertyType == lightSetType))
+        {
+            var lightSet = Traverse.Create(property.GetValue(config));
+            if (lightSet.Property<bool>("Enabled").Value)
+            {
+                events[lightSet.Property<BasicBeatmapEventType>("BeatmapEventType").Value] =
+                    (lightSet.Property<int>("ColorMode").Value, lightSet.Property<float>("Brightness").Value);
+            }
+        }
+
+        return events;
+    }
+#endif
 
     private void CollectOffLights()
     {
