@@ -28,6 +28,7 @@ I've been heavily inspired by [kinsi55](https://github.com/kinsi55)'s [ImBlinded
 - Static lights in a single view are applied per camera, and may miss lights on the newer environments that use GSL. With static lights in both views, the level loads with the game's own static lights instead, the same as its "Static lights -> No Effects" setting.
 - Sabres colours are global, meaning you either get your own sabres colours from your colour scheme, or the map's colour scheme. A per view override would be too much code to maintain for little gains.
 <sub>Even if I were to implement such thing (which I will not), mods like ReeSabers implement setting custom colours for your sabres, which I'm sure would break with Chromason; sorgy :c</sub>
+- [NoteTweaks](https://git.gay/TheBlackParrot/BS_NoteTweaks/) is not supported with the `1.42-1.44` version of this mod, sorry. If anyone wants to contribute feel free to, but it's too hard for me to sorgy（>_<）
 
 ## Building
 
