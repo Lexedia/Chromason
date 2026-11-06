@@ -53,4 +53,4 @@ several game versions.
 - [Aeroluna](https://github.com/Aeroluna)'s [Chroma and Heck](https://github.com/Aeroluna/Heck), which Chromason is built around.
 - [ScoreSaber](https://github.com/ScoreSaber)'s [Legato](https://github.com/ScoreSaber/legato), for building against several game versions from one source tree.
 - [TheBlackParrot](https://git.gay/TheBlackParrot)'s [NoteTweaks](https://git.gay/TheBlackParrot/BS_NoteTweaks), whose note colours Chromason follows.
-
+- [Exomanz](https://github.com/Exomanz)'s [BetterLegacyLights](https://github.com/Exomanz/BetterLegacyLights)/[BetterStaticLights](https://github.com/Exomanz/BetterStaticLights) for static lights.
