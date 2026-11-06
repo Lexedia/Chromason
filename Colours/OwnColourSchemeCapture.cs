@@ -30,6 +30,27 @@ internal static class OwnColourSchemeCapture
     {
         Capture(_playerOverride ?? SchemeOf(__instance));
     }
+#elif BEAT_SABER_1_42_0
+    private static IEnumerable<MethodBase> TargetMethods()
+    {
+        yield return AccessTools.Method(typeof(StandardLevelScenesTransitionSetupDataSO), nameof(StandardLevelScenesTransitionSetupDataSO.GetColorInfo));
+    }
+
+    [HarmonyPriority(Priority.First)]
+    private static void Postfix((bool, ColorScheme) __result)
+    {
+        Capture(__result.Item2);
+    }
+
+    [HarmonyPatch(typeof(MultiplayerLevelScenesTransitionSetupDataSO), nameof(MultiplayerLevelScenesTransitionSetupDataSO.Init))]
+    private static class MultiplayerCapture
+    {
+        [HarmonyPriority(Priority.First)]
+        private static void Postfix(MultiplayerLevelScenesTransitionSetupDataSO __instance, ColorScheme? overrideColorScheme)
+        {
+            Capture(overrideColorScheme ?? new ColorScheme(__instance._environmentInfo.colorScheme));
+        }
+    }
 #else
     private static IEnumerable<MethodBase> TargetMethods()
     {

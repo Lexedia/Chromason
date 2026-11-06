@@ -25,6 +25,7 @@ internal static class NoteTweaksCompat
     {
 #if BEAT_SABER_1_29_0
         // NoteTweaks doesnt support 1.29
+        // n.b technically it does but im way too fucking lazy to backport the old plugin so live with it... sorry ⚞^. .^⚟
 #else
         var hook = AccessTools.TypeByName("NoteTweaks.Hooks.SetGameNoteControllerColorHook");
         var colourTweaks = AccessTools.TypeByName("NoteTweaks.Patches.NoteColorTweaks");
