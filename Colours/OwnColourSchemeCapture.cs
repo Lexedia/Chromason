@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Chromason.Configuration;
 using HarmonyLib;
@@ -28,8 +30,15 @@ internal static class OwnColourSchemeCapture
     [HarmonyPriority(Priority.First)]
     private static void Postfix(object __instance)
     {
-        Capture(_playerOverride ?? SchemeOf(__instance));
+        Capture(_playerOverride ?? EnvironmentSchemeOf(__instance));
     }
+
+    private static ColorScheme? EnvironmentSchemeOf(object setupData) => setupData switch
+    {
+        StandardLevelScenesTransitionSetupDataSO standard => new ColorScheme(standard.environmentInfo.colorScheme),
+        MultiplayerLevelScenesTransitionSetupDataSO multiplayer => new ColorScheme(multiplayer._multiplayerEnvironmentInfo.colorScheme),
+        _ => null
+    };
 #elif BEAT_SABER_1_42_0
     private static IEnumerable<MethodBase> TargetMethods()
     {
@@ -63,7 +72,30 @@ internal static class OwnColourSchemeCapture
     {
         Capture(SchemeOf(__instance));
     }
+
+    private static ColorScheme? SchemeOf(object setupData) => setupData switch
+    {
+        StandardLevelScenesTransitionSetupDataSO standard => standard.colorScheme,
+        MultiplayerLevelScenesTransitionSetupDataSO multiplayer => multiplayer.colorScheme,
+        _ => null
+    };
 #endif
+
+    // Campaign levels have no map colours, so the scheme they play with is the player's own
+    [HarmonyPatch]
+    private static class MissionCapture
+    {
+        private static IEnumerable<MethodBase> TargetMethods() =>
+            AccessTools.GetDeclaredMethods(typeof(MissionLevelScenesTransitionSetupDataSO))
+                .Where(method => method.Name == "Init");
+
+        [HarmonyPriority(Priority.First)]
+        private static void Postfix(MissionLevelScenesTransitionSetupDataSO __instance)
+        {
+            var sceneSetupData = AccessTools.Field(typeof(MissionLevelScenesTransitionSetupDataSO), "_sceneSetupDataArray")?.GetValue(__instance) as IEnumerable;
+            Capture(sceneSetupData?.OfType<GameplayCoreSceneSetupData>().FirstOrDefault()?.colorScheme);
+        }
+    }
 
     private static void Capture(ColorScheme? scheme)
     {
@@ -72,11 +104,4 @@ internal static class OwnColourSchemeCapture
             ? (scheme.saberAColor, scheme.saberBColor)
             : null;
     }
-
-    private static ColorScheme? SchemeOf(object setupData) => setupData switch
-    {
-        StandardLevelScenesTransitionSetupDataSO standard => standard.colorScheme,
-        MultiplayerLevelScenesTransitionSetupDataSO multiplayer => multiplayer.colorScheme,
-        _ => null
-    };
 }

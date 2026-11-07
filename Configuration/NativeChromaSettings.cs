@@ -16,8 +16,6 @@ internal static class NativeChromaSettings
 
     private static readonly List<(SettableSetting<bool> Setting, bool? Previous)> Overridden = [];
 
-    internal static int Generation { get; private set; }
-
     private static IEnumerable<MethodBase> TargetMethods() =>
         AccessTools.GetDeclaredMethods(typeof(StandardLevelScenesTransitionSetupDataSO))
             .Concat(AccessTools.GetDeclaredMethods(typeof(MultiplayerLevelScenesTransitionSetupDataSO)))
@@ -27,7 +25,6 @@ internal static class NativeChromaSettings
     private static void Prefix()
     {
         Release();
-        Generation++;
 
         var config = PluginConfig.Instance;
         Override(ChromaSettableSettings.ChromaEventsDisabledSetting,
@@ -67,16 +64,15 @@ internal static class NativeChromaSettings
         Overridden.Clear();
     }
 
-    internal class LevelRelease : System.IDisposable
+    [HarmonyPatch]
+    private static class MenuReturn
     {
-        private readonly int _generation = Generation;
+        private static MethodBase TargetMethod() =>
+            AccessTools.Method(AccessTools.TypeByName("GameScenesManager"), "PopScenes");
 
-        public void Dispose()
+        private static void Prefix()
         {
-            if (_generation == Generation)
-            {
-                Release();
-            }
+            Release();
         }
     }
 }

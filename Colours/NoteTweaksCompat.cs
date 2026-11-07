@@ -35,8 +35,8 @@ internal static class NoteTweaksCompat
         }
 
         _setNoteColour = AccessTools.Method(hook, "SetNoteControllerColor", [typeof(NoteController)]);
-        _patchColours = AccessTools.Method(colourTweaks, "PatchColors");
-        _patchedSchemeField = AccessTools.Field(colourTweaks, "_patchedScheme");
+        _patchColours = AccessTools.Method(colourTweaks, "PatchColors", [typeof(ColorSchemeSO)]);
+        _patchedSchemeField = AccessTools.Field(colourTweaks, "_patchedScheme") is { IsStatic: true } field ? field : null;
 
         if (_setNoteColour == null)
         {
@@ -62,6 +62,12 @@ internal static class NoteTweaksCompat
         try
         {
             return _patchColours.Invoke(null, [schemeAsset]) as ColorScheme;
+        }
+        catch (System.Exception exception)
+        {
+            Plugin.Log.Warn($"Could not get NoteTweaks' version of your colours, using them as they are: {exception}");
+            _patchColours = null;
+            return null;
         }
         finally
         {
@@ -111,12 +117,20 @@ internal static class NoteTweaksCompat
         var live = Read(controllers);
         var bodyAlpha = body.materialPropertyBlock.GetColor(ColourId).a;
 
-        var own = level.Own is { } ownScheme
-            ? Recolour(noteController, controllers, body, (colourType == ColorType.ColorB ? ownScheme.saberBColor : ownScheme.saberAColor).ColorWithAlpha(bodyAlpha))
-            : null;
-        var scheme = Recolour(noteController, controllers, body, level.ColourManager.ColorForType(colourType).ColorWithAlpha(bodyAlpha));
+        Color[]? own;
+        Color[] scheme;
+        try
+        {
+            own = level.Own is { } ownScheme
+                ? Recolour(noteController, controllers, body, (colourType == ColorType.ColorB ? ownScheme.saberBColor : ownScheme.saberAColor).ColorWithAlpha(bodyAlpha))
+                : null;
+            scheme = Recolour(noteController, controllers, body, level.ColourManager.ColorForType(colourType).ColorWithAlpha(bodyAlpha));
+        }
+        finally
+        {
+            Write(controllers, live);
+        }
 
-        Write(controllers, live);
         Variants[noteController] = new NoteVariants([.. controllers], scheme, own);
     }
 

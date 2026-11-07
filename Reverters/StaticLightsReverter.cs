@@ -167,20 +167,26 @@ internal class StaticLightsReverter : LightSwapReverter
 
     private static Dictionary<BasicBeatmapEventType, (int Value, float Brightness)> StaticEvents(DiContainer container)
     {
+        try
+        {
 #if BEAT_SABER_1_29_0
-
-        if (BetterStaticLightsEvents() is { } staticEvents)
-        {
-            Plugin.Log.Debug($"Static lights follow BetterStaticLights: {staticEvents.Count} light sets on");
-            return staticEvents;
-        }
+            if (BetterStaticLightsEvents() is { } staticEvents)
+            {
+                Plugin.Log.Debug($"Static lights follow BetterStaticLights: {staticEvents.Count} light sets on");
+                return staticEvents;
+            }
 #else
-        if (BetterLegacyLightsEvents(container) is { } legacyEvents)
-        {
-            Plugin.Log.Debug($"Static lights follow BetterLegacyLights: {legacyEvents.Count} light sets on");
-            return legacyEvents;
-        }
+            if (BetterLegacyLightsEvents(container) is { } legacyEvents)
+            {
+                Plugin.Log.Debug($"Static lights follow BetterLegacyLights: {legacyEvents.Count} light sets on");
+                return legacyEvents;
+            }
 #endif
+        }
+        catch (System.Exception exception)
+        {
+            Plugin.Log.Warn($"Could not read the static light sets of another mod, using the default ones: {exception}");
+        }
 
         return new()
         {
