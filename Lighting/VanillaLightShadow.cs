@@ -58,6 +58,9 @@ internal static class VanillaLightShadow
         using var scope = BeginOwnScheme(twin);
         try
         {
+#if BEAT_SABER_1_29_0
+            twin.Awake();
+#endif
             twin.Start();
         }
         catch (Exception exception)
