@@ -32,18 +32,26 @@ internal class StaticLightsReverter : LightSwapReverter
     private readonly List<ParticleSystemRenderer> _particles = [];
     private readonly List<ParticleSystemRenderer> _hiddenParticles = [];
     private readonly HashSet<Transform> _offLights = [];
-    private readonly List<Transform> _hiddenLights = [];
+    private readonly List<(Transform Light, Vector3 LocalPosition)> _hiddenLights = [];
+
+    private readonly bool _nativeStatic;
 
     private bool _captured;
     private bool _capturedBeforeEnvironment;
     private bool _useOwnColours;
 
-    private StaticLightsReverter(PluginConfig config, ColourSchemes schemes, DiContainer container, [InjectOptional] LightColorizerManager? manager)
+    private StaticLightsReverter(
+        PluginConfig config,
+        ColourSchemes schemes,
+        DiContainer container,
+        [InjectOptional] GameplayCoreSceneSetupData? setupData,
+        [InjectOptional] LightColorizerManager? manager)
         : base(manager)
     {
         _config = config;
         _schemes = schemes;
         _staticEvents = StaticEvents(container);
+        _nativeStatic = setupData != null && NativeStaticLightsPatch.IsActiveFor(setupData);
     }
 
     protected override bool HandlesVanillaLights => true;
@@ -57,7 +65,7 @@ internal class StaticLightsReverter : LightSwapReverter
 
         _useOwnColours = _schemes.HasMapColours && _config.MapColoursDisabledFor(view);
 
-        if (NativeStaticLightsPatch.IsActive && !_useOwnColours)
+        if (_nativeStatic && !_useOwnColours)
         {
             return;
         }
@@ -98,8 +106,8 @@ internal class StaticLightsReverter : LightSwapReverter
         CollectOffLights();
         foreach (var light in _offLights)
         {
+            _hiddenLights.Add((light, light.localPosition));
             light.position += HiddenOffset;
-            _hiddenLights.Add(light);
         }
     }
 
@@ -107,9 +115,10 @@ internal class StaticLightsReverter : LightSwapReverter
     {
         for (var i = _hiddenLights.Count - 1; i >= 0; i--)
         {
-            if (_hiddenLights[i] != null)
+            var (light, localPosition) = _hiddenLights[i];
+            if (light != null)
             {
-                _hiddenLights[i].position -= HiddenOffset;
+                light.localPosition = localPosition;
             }
         }
 

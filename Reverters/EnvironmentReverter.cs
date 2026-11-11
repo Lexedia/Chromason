@@ -26,6 +26,7 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
     private bool _prepared;
 
     private List<Transform>? _offsetRoots;
+    private readonly List<Vector3> _offsetRootPositions = [];
     private int _offsetCount;
     private int _swappedCount;
     private bool _fogSwapped;
@@ -63,7 +64,9 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
         _offsetRoots = vanilla ? _addedRoots : _removedRoots;
         for (; _offsetCount < _offsetRoots.Count; _offsetCount++)
         {
-            if (_offsetRoots[_offsetCount] is { } root && root != null)
+            var root = _offsetRoots[_offsetCount];
+            _offsetRootPositions.Add(root != null ? root.localPosition : default);
+            if (root != null)
             {
                 root.position += HiddenOffset;
             }
@@ -108,12 +111,13 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
             {
                 if (_offsetRoots[i] is { } root && root != null)
                 {
-                    root.position -= HiddenOffset;
+                    root.localPosition = _offsetRootPositions[i];
                 }
             }
         }
 
         _offsetRoots = null;
+        _offsetRootPositions.Clear();
         _offsetCount = 0;
     }
 
@@ -254,6 +258,13 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
 
             _current = TransformState.Capture(_transform);
 
+            var originalParent = _original.Parent;
+            if (_transform.parent != originalParent && originalParent != null)
+            {
+                SwapToOriginalUnder(originalParent);
+                return;
+            }
+
             if (_position)
             {
                 _transform.localPosition = _original.LocalPosition;
@@ -269,6 +280,28 @@ internal class EnvironmentReverter : IViewReverter, ITickable, IDisposable
                 _transform.localScale = _original.LocalScale;
             }
         }
+
+        private void SwapToOriginalUnder(Transform? originalParent)
+        {
+            if (_position)
+            {
+                _transform.position = originalParent != null ? originalParent.TransformPoint(_original.LocalPosition) : _original.LocalPosition;
+            }
+
+            if (_rotation)
+            {
+                _transform.rotation = originalParent != null ? originalParent.rotation * _original.LocalRotation : _original.LocalRotation;
+            }
+
+            if (_scale)
+            {
+                var target = originalParent != null ? Vector3.Scale(originalParent.lossyScale, _original.LocalScale) : _original.LocalScale;
+                var parentScale = _transform.parent != null ? _transform.parent.lossyScale : Vector3.one;
+                _transform.localScale = new Vector3(Divide(target.x, parentScale.x), Divide(target.y, parentScale.y), Divide(target.z, parentScale.z));
+            }
+        }
+
+        private static float Divide(float value, float by) => Mathf.Approximately(by, 0f) ? value : value / by;
 
         internal void SwapBack()
         {
