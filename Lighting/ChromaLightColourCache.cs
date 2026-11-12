@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Chroma.Lighting;
+using Chromason.Rendering;
 using HarmonyLib;
 using UnityEngine;
 
@@ -16,6 +17,9 @@ internal static class ChromaLightColourCache
 
     private static void Postfix(ChromaIDColorTween __instance, Color color)
     {
-        Colours[__instance._lightWithId] = color;
+        if (ViewReverterRegistry.SwapsLights)
+        {
+            Colours[__instance._lightWithId] = color;
+        }
     }
 }
