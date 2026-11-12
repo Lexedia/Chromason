@@ -13,7 +13,7 @@ internal static class NoteTweaksCompat
 
     private static readonly Dictionary<NoteControllerBase, NoteVariants> Variants = [];
 
-    private static MethodInfo? _setNoteColour;
+    private static System.Action<NoteController>? _setNoteColour;
     private static MethodInfo? _patchColours;
     private static FieldInfo? _patchedSchemeField;
 
@@ -37,7 +37,9 @@ internal static class NoteTweaksCompat
             return;
         }
 
-        _setNoteColour = AccessTools.Method(hook, "SetNoteControllerColor", [typeof(NoteController)]);
+        _setNoteColour = AccessTools.Method(hook, "SetNoteControllerColor", [typeof(NoteController)]) is { IsStatic: true } setNoteColour
+            ? (System.Action<NoteController>)setNoteColour.CreateDelegate(typeof(System.Action<NoteController>))
+            : null;
         _patchColours = AccessTools.Method(colourTweaks, "PatchColors", [typeof(ColorSchemeSO)]);
         _patchedSchemeField = AccessTools.Field(colourTweaks, "_patchedScheme") is { IsStatic: true } field ? field : null;
 
@@ -95,16 +97,49 @@ internal static class NoteTweaksCompat
             return;
         }
 
+        if (!Variants.TryGetValue(noteController, out var variants))
+        {
+            if (CreateVariants(noteController, level.Own != null) is not { } created)
+            {
+                return;
+            }
+
+            variants = created;
+            Variants[noteController] = variants;
+        }
+
+        var colourType = noteController.noteData.colorType;
+        var bodyAlpha = variants.Body.materialPropertyBlock.GetColor(ColourId).a;
+
+        Read(variants.Controllers, variants.Saved);
+        try
+        {
+            if (level.Own is { } ownScheme && variants.Own != null)
+            {
+                var ownColour = colourType == ColorType.ColorB ? ownScheme.saberBColor : ownScheme.saberAColor;
+                Recolour(noteController, variants, ownColour.ColorWithAlpha(bodyAlpha), variants.Own);
+            }
+
+            Recolour(noteController, variants, level.ColourManager.ColorForType(colourType).ColorWithAlpha(bodyAlpha), variants.Scheme);
+        }
+        finally
+        {
+            Write(variants.Controllers, variants.Saved);
+        }
+    }
+
+    private static NoteVariants? CreateVariants(NoteController noteController, bool withOwn)
+    {
         var visuals = noteController.GetComponent<ColorNoteVisuals>();
         if (visuals == null || visuals.transform.childCount == 0)
         {
-            return;
+            return null;
         }
 
         var body = visuals.transform.GetChild(0).GetComponent<MaterialPropertyBlockController>();
         if (body == null || !HasColour(body))
         {
-            return;
+            return null;
         }
 
         var controllers = new List<MaterialPropertyBlockController>();
@@ -116,25 +151,7 @@ internal static class NoteTweaksCompat
             }
         }
 
-        var colourType = noteController.noteData.colorType;
-        var live = Read(controllers);
-        var bodyAlpha = body.materialPropertyBlock.GetColor(ColourId).a;
-
-        Color[]? own;
-        Color[] scheme;
-        try
-        {
-            own = level.Own is { } ownScheme
-                ? Recolour(noteController, controllers, body, (colourType == ColorType.ColorB ? ownScheme.saberBColor : ownScheme.saberAColor).ColorWithAlpha(bodyAlpha))
-                : null;
-            scheme = Recolour(noteController, controllers, body, level.ColourManager.ColorForType(colourType).ColorWithAlpha(bodyAlpha));
-        }
-        finally
-        {
-            Write(controllers, live);
-        }
-
-        Variants[noteController] = new NoteVariants([.. controllers], scheme, own);
+        return new NoteVariants([.. controllers], body, withOwn);
     }
 
     private static bool HasColour(MaterialPropertyBlockController controller)
@@ -146,18 +163,11 @@ internal static class NoteTweaksCompat
 #endif
     }
 
-    private static Color[] Recolour(NoteController note, List<MaterialPropertyBlockController> controllers, MaterialPropertyBlockController body, Color colour)
+    private static void Recolour(NoteController note, NoteVariants variants, Color colour, Color[] into)
     {
-        body.materialPropertyBlock.SetColor(ColourId, colour);
-        _setNoteColour!.Invoke(null, [note]);
-        return Read(controllers);
-    }
-
-    private static Color[] Read(IReadOnlyList<MaterialPropertyBlockController> controllers)
-    {
-        var colours = new Color[controllers.Count];
-        Read(controllers, colours);
-        return colours;
+        variants.Body.materialPropertyBlock.SetColor(ColourId, colour);
+        _setNoteColour!(note);
+        Read(variants.Controllers, into);
     }
 
     internal static void Read(IReadOnlyList<MaterialPropertyBlockController> controllers, Color[] colours)
@@ -186,17 +196,19 @@ internal static class NoteTweaksCompat
     internal readonly struct NoteVariants
     {
         internal readonly MaterialPropertyBlockController[] Controllers;
+        internal readonly MaterialPropertyBlockController Body;
 
         internal readonly Color[] Scheme;
         internal readonly Color[]? Own;
 
         internal readonly Color[] Saved;
 
-        internal NoteVariants(MaterialPropertyBlockController[] controllers, Color[] scheme, Color[]? own)
+        internal NoteVariants(MaterialPropertyBlockController[] controllers, MaterialPropertyBlockController body, bool withOwn)
         {
             Controllers = controllers;
-            Scheme = scheme;
-            Own = own;
+            Body = body;
+            Scheme = new Color[controllers.Length];
+            Own = withOwn ? new Color[controllers.Length] : null;
             Saved = new Color[controllers.Length];
         }
     }
