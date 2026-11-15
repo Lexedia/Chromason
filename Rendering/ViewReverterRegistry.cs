@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Chromason.Configuration;
 using Chromason.Reverters;
 using UnityEngine;
 using Zenject;
@@ -11,6 +12,8 @@ namespace Chromason.Rendering;
 internal class ViewReverterRegistry : IInitializable, IDisposable
 {
     internal static ViewReverterRegistry? Current { get; private set; }
+
+    internal static bool SwapsLights { get; private set; }
 
     private readonly List<IViewReverter> _reverters;
     private readonly List<IViewReverter> _applied = [];
@@ -28,6 +31,9 @@ internal class ViewReverterRegistry : IInitializable, IDisposable
     {
         Current = this;
 
+        var config = PluginConfig.Instance;
+        SwapsLights = SwapsLightsIn(config, ViewKind.Headset) || SwapsLightsIn(config, ViewKind.Desktop);
+
         _restorer = new GameObject("Chromason end of frame restorer").AddComponent<EndOfFrameRestorer>();
         _restorer.Registry = this;
     }
@@ -44,6 +50,7 @@ internal class ViewReverterRegistry : IInitializable, IDisposable
         if (Current == this)
         {
             Current = null;
+            SwapsLights = false;
         }
     }
 
@@ -105,6 +112,9 @@ internal class ViewReverterRegistry : IInitializable, IDisposable
         _applied.Clear();
         _appliedBy = null;
     }
+
+    private static bool SwapsLightsIn(PluginConfig config, ViewKind view) =>
+        config.ChromaEventsDisabledFor(view) || config.StaticLightsFor(view) || config.MapColoursDisabledFor(view);
 
     private void Fail(IViewReverter reverter, string step, Exception exception)
     {

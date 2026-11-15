@@ -135,7 +135,18 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
     {
         if (Manager != null)
         {
-            return ChromaLightColourCache.TryGetColour(light, out colour);
+            if (ChromaLightColourCache.TryGetColour(light, out colour))
+            {
+                return true;
+            }
+
+            if (group.TryGetChromaTween(light, out var tween))
+            {
+                colour = tween.GetValue(tween.progress);
+                return true;
+            }
+
+            return false;
         }
 
         colour = _lightManager!._colors[group.Effect._lightsID] ?? Color.clear;
@@ -200,6 +211,12 @@ internal abstract class LightSwapReverter(LightColorizerManager? manager) : IVie
         }
 
         public Enumerator GetEnumerator() => new(_chromaLights, _lights);
+
+        internal bool TryGetChromaTween(ILightWithId light, out ChromaIDColorTween tween)
+        {
+            tween = null!;
+            return _chromaLights != null && _chromaLights.TryGetValue(light, out tween);
+        }
 
         public struct Enumerator
         {

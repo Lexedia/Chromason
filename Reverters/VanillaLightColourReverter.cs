@@ -16,7 +16,7 @@ namespace Chromason.Reverters;
 
 internal class VanillaLightColourReverter : LightSwapReverter, IInitializable
 {
-    private static readonly FieldInfo[] TwinFields = [.. AccessTools.GetDeclaredFields(typeof(LightSwitchEventEffect)).Where(field => !field.IsStatic && field.FieldType != typeof(BeatmapDataCallbackWrapper))];
+    private static readonly FieldInfo[] TwinFields = [.. AccessTools.GetDeclaredFields(typeof(LightSwitchEventEffect)).Where(field => !field.IsStatic && field.FieldType != typeof(BeatmapDataCallbackWrapper) && field.Name != nameof(LightSwitchEventEffect._colorTween))];
 
     private readonly PluginConfig _config;
     private readonly ColourSchemes _schemes;

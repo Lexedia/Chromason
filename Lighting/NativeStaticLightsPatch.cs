@@ -12,17 +12,15 @@ namespace Chromason.Lighting;
 [HarmonyPatch]
 internal static class NativeStaticLightsPatch
 {
-    internal static bool IsActive { get; private set; }
-
 #if BEAT_SABER_1_29_0
     private static IEnumerable<MethodBase> TargetMethods()
     {
         yield return AccessTools.Method(typeof(BeatmapDataLoader), nameof(BeatmapDataLoader.GetBeatmapDataFromSaveData));
     }
 
-    private static void Prefix(BeatmapDifficulty beatmapDifficulty, ref PlayerSpecificSettings? playerSpecificSettings)
+    private static void Prefix(ref PlayerSpecificSettings? playerSpecificSettings)
     {
-        LoadStatic(beatmapDifficulty, ref playerSpecificSettings);
+        LoadStatic(ref playerSpecificSettings);
     }
 #else
     private static IEnumerable<MethodBase> TargetMethods()
@@ -31,28 +29,38 @@ internal static class NativeStaticLightsPatch
         yield return AccessTools.Method(typeof(BeatmapDataLoader), nameof(BeatmapDataLoader.LoadBeatmapData));
     }
 
-    private static void Prefix(BeatmapKey beatmapKey, ref PlayerSpecificSettings? playerSpecificSettings)
+    private static void Prefix(ref PlayerSpecificSettings? playerSpecificSettings)
     {
-        LoadStatic(beatmapKey.difficulty, ref playerSpecificSettings);
+        LoadStatic(ref playerSpecificSettings);
     }
 #endif
 
-    private static void LoadStatic(BeatmapDifficulty difficulty, ref PlayerSpecificSettings? playerSpecificSettings)
+    internal static bool IsActiveFor(GameplayCoreSceneSetupData setupData)
     {
-        if (playerSpecificSettings == null)
+        if (setupData.playerSpecificSettings is not { } playerSpecificSettings)
         {
-            IsActive = false;
-            return;
+            return false;
         }
 
-        var config = PluginConfig.Instance;
-        if (config.StaticLightsFor(ViewKind.Headset) && config.StaticLightsFor(ViewKind.Desktop))
+#if BEAT_SABER_1_29_0
+        var difficulty = setupData.difficultyBeatmap.difficulty;
+#else
+        var difficulty = setupData.beatmapKey.difficulty;
+#endif
+        return IsForced(PluginConfig.Instance) ||
+               playerSpecificSettings.GetEnvironmentEffectsFilterPreset(difficulty) == EnvironmentEffectsFilterPreset.NoEffects;
+    }
+
+    private static bool IsForced(PluginConfig config) =>
+        config.StaticLightsFor(ViewKind.Headset) && config.StaticLightsFor(ViewKind.Desktop);
+
+    private static void LoadStatic(ref PlayerSpecificSettings? playerSpecificSettings)
+    {
+        if (playerSpecificSettings != null && IsForced(PluginConfig.Instance))
         {
             playerSpecificSettings = playerSpecificSettings.CopyWith(
                 environmentEffectsFilterDefaultPreset: EnvironmentEffectsFilterPreset.NoEffects,
                 environmentEffectsFilterExpertPlusPreset: EnvironmentEffectsFilterPreset.NoEffects);
         }
-
-        IsActive = playerSpecificSettings.GetEnvironmentEffectsFilterPreset(difficulty) == EnvironmentEffectsFilterPreset.NoEffects;
     }
 }

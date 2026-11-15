@@ -81,7 +81,6 @@ internal static class OwnColourSchemeCapture
     };
 #endif
 
-    // Campaign levels have no map colours, so the scheme they play with is the player's own
     [HarmonyPatch]
     private static class MissionCapture
     {

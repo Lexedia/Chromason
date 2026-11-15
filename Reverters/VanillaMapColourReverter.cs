@@ -18,7 +18,7 @@ internal class VanillaMapColourReverter : IViewReverter, IInitializable, IDispos
     private readonly BeatmapObjectManager _beatmapObjectManager;
     private readonly bool _chromaColours;
 
-    private readonly List<(NoteController Note, ColorNoteVisuals Visuals)> _notes = [];
+    private readonly Dictionary<NoteController, ColorNoteVisuals> _notes = [];
     private readonly List<SliderController> _arcs = [];
     private readonly List<ObstacleController> _obstacles = [];
 
@@ -114,8 +114,9 @@ internal class VanillaMapColourReverter : IViewReverter, IInitializable, IDispos
 
     private void ApplyNotes(ColorScheme own)
     {
-        foreach (var (note, visuals) in _notes)
+        foreach (var pair in _notes)
         {
+            var (note, visuals) = (pair.Key, pair.Value);
             if (note == null || !note.isActiveAndEnabled || OwnColour(own, note.noteData.colorType) is not { } colour)
             {
                 continue;
@@ -219,13 +220,13 @@ internal class VanillaMapColourReverter : IViewReverter, IInitializable, IDispos
     {
         if (note is GameNoteController or BurstSliderGameNoteController && note.GetComponent<ColorNoteVisuals>() is { } visuals)
         {
-            _notes.Add((note, visuals));
+            _notes[note] = visuals;
         }
     }
 
     private void HandleNoteWasDespawned(NoteController note)
     {
-        _notes.RemoveAll(entry => entry.Note == note);
+        _notes.Remove(note);
     }
 
     private void HandleArcWasDespawned(SliderController arc)

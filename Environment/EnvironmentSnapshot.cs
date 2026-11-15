@@ -5,19 +5,21 @@ namespace Chromason.Environment;
 
 internal readonly struct TransformState
 {
+    internal readonly Transform? Parent;
     internal readonly Vector3 LocalPosition;
     internal readonly Quaternion LocalRotation;
     internal readonly Vector3 LocalScale;
 
-    private TransformState(Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
+    private TransformState(Transform? parent, Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
     {
+        Parent = parent;
         LocalPosition = localPosition;
         LocalRotation = localRotation;
         LocalScale = localScale;
     }
 
     internal static TransformState Capture(Transform transform) =>
-        new(transform.localPosition, transform.localRotation, transform.localScale);
+        new(transform.parent, transform.localPosition, transform.localRotation, transform.localScale);
 }
 
 internal readonly struct ObjectState

@@ -8,7 +8,7 @@ internal static class LightManagerPerCameraPatch
 {
     private static void Prefix(LightManager __instance)
     {
-        if (ViewReverterRegistry.Current != null)
+        if (ViewReverterRegistry.SwapsLights)
         {
             __instance.lastRefreshFrameNum = -1;
         }
