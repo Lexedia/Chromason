@@ -34,7 +34,7 @@ internal class ObstacleColourReverter : ObjectColouriserReverter
     {
         foreach (var pair in _manager!.Colorizers)
         {
-            if (pair.Key.isActiveAndEnabled)
+            if (pair.Key.gameObject.activeInHierarchy)
             {
                 colourisers.Add(pair.Value);
             }

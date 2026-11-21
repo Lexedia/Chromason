@@ -42,7 +42,7 @@ internal class NoteColourReverter : ObjectColouriserReverter
     {
         foreach (var pair in _manager!.Colorizers)
         {
-            if (pair.Key.isActiveAndEnabled && !NoteTweaksCompat.TryGetVariants(pair.Key, out _))
+            if (pair.Key.gameObject.activeInHierarchy && !NoteTweaksCompat.TryGetVariants(pair.Key, out _))
             {
                 colourisers.Add(pair.Value);
             }
@@ -60,7 +60,7 @@ internal class NoteColourReverter : ObjectColouriserReverter
 
         foreach (var pair in _manager!.Colorizers)
         {
-            if (!pair.Key.isActiveAndEnabled || !NoteTweaksCompat.TryGetVariants(pair.Key, out var variants))
+            if (!pair.Key.gameObject.activeInHierarchy || !NoteTweaksCompat.TryGetVariants(pair.Key, out var variants))
             {
                 continue;
             }

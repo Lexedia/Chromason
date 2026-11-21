@@ -48,7 +48,7 @@ internal class ArcColourReverter : IViewReverter
         foreach (var pair in _manager.Colorizers)
         {
             var arc = pair.Key;
-            if (arc == null || !arc.isActiveAndEnabled)
+            if (arc == null || !arc.gameObject.activeInHierarchy)
             {
                 continue;
             }

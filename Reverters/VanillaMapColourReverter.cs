@@ -117,7 +117,7 @@ internal class VanillaMapColourReverter : IViewReverter, IInitializable, IDispos
         foreach (var pair in _notes)
         {
             var (note, visuals) = (pair.Key, pair.Value);
-            if (note == null || !note.isActiveAndEnabled || OwnColour(own, note.noteData.colorType) is not { } colour)
+            if (note == null || !note.gameObject.activeInHierarchy || OwnColour(own, note.noteData.colorType) is not { } colour)
             {
                 continue;
             }
@@ -152,7 +152,7 @@ internal class VanillaMapColourReverter : IViewReverter, IInitializable, IDispos
     {
         foreach (var arc in _arcs)
         {
-            if (arc == null || !arc.isActiveAndEnabled || OwnColour(own, arc.sliderData.colorType) is not { } colour || colour == arc._initColor)
+            if (arc == null || !arc.gameObject.activeInHierarchy || OwnColour(own, arc.sliderData.colorType) is not { } colour || colour == arc._initColor)
             {
                 continue;
             }
@@ -168,7 +168,7 @@ internal class VanillaMapColourReverter : IViewReverter, IInitializable, IDispos
         var colour = own.obstaclesColor;
         foreach (var obstacle in _obstacles)
         {
-            if (obstacle == null || !obstacle.isActiveAndEnabled || obstacle.color == colour)
+            if (obstacle == null || !obstacle.gameObject.activeInHierarchy || obstacle.color == colour)
             {
                 continue;
             }
