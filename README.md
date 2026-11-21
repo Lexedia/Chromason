@@ -30,6 +30,7 @@ I've been heavily inspired by [kinsi55](https://github.com/kinsi55)'s [ImBlinded
 <sub>Even if I were to implement such thing (which I will not), mods like ReeSabers implement setting custom colours for your sabres, which I'm sure would break with Chromason; sorgy :c</sub>
 - [NoteTweaks](https://git.gay/TheBlackParrot/BS_NoteTweaks/) is not supported with the `1.42-1.44` version of this mod, because it crashes the game or straight up doesn't load for a reason unbeknownst to be; sorgy（>_<）. If anyone wants to contribute feel free to.
 - ReeSabers with ReeNotes is not supported; the initial reason I didn't support per view sabre colours was because it was too much work, would likely break and it'd be a hell of a maintenance. Well, ReeNotes released and it's the same thing but worse because there are more than only one or two meshes to re-render, so for every note and every camera render, a re-forced update to the note plus whatever pushes the rewsult into the module's materials would be resource intensive, laggy and yea, you get the idea, so my bad.
+- ScoreSaber records the desktop colours, meaning if you use your custom colours on your headset but not your desktop, SS will use the map's colours.
 
 ## Building
 
