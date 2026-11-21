@@ -3,7 +3,7 @@
   "id": "Chromason",
   "name": "Chromason",
   "author": "lexedia",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Walls off Chroma for your pretty eyes, but keep it fancy for other people to see it.",
   "gameVersion": "1.40.8",
   "dependsOn": {
