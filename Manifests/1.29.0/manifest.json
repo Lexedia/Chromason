@@ -15,5 +15,8 @@
   },
   "loadAfter": [
     "Chroma"
-  ]
+  ],
+  "conflictsWith": {
+    "ImBlindedByTheLights": "^0.0.1"
+  }
 }
