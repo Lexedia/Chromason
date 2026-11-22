@@ -4,7 +4,7 @@
   "name": "Chromason",
   "author": "lexedia",
   "version": "0.1.0",
-  "description": "Walls off Chroma for your pretty eyes, but keep it fancy for other people to see it.",
+  "description": "Walls off Chroma for your pretty eyes, but keep it fancy for other people to see.",
   "gameVersion": "1.40.8",
   "dependsOn": {
     "BSIPA": "^4.2.2",
