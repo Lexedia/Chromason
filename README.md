@@ -1,6 +1,6 @@
 # Chromason
 
-Walls off Chroma for your pretty eyes, but keep it fancy for other people to see it :D
+Walls off Chroma for your pretty eyes, but keep it fancy for other people to see :D
 
 <img width="64" height="64" alt="son" src="https://github.com/user-attachments/assets/a7f5fae1-4387-4651-b7f2-e3c93a40fd21" />
 
