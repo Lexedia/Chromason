@@ -6,6 +6,11 @@ Walls off Chroma for your pretty eyes, but keep it fancy for other people to see
 
 (The name was just a portmanteau of Chroma and mason, but now the kirk worms have taken upon my brain. I'm very sorry)
 
+## Preview
+
+<img width="480" height="270" alt="beat saber gameplay, with the headset view on the right and desktop view on the left" src="https://github.com/user-attachments/assets/abcf3312-102e-4cd0-9b73-4d498e83716e" />
+
+
 ## How it works
 
 Chroma's own settings can't be split by camera. It decides when a level loads which features run and which
